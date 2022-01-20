@@ -57,7 +57,8 @@ impl Tree {
         a
     }
     pub fn run_through(&mut self, inputs: &[f32]) {
-
+        //lets get breath first
+        
         for i in &self.arena{
             println!("next nodes:{:?}",i.as_ref().unwrap().next_nodes);
         }
