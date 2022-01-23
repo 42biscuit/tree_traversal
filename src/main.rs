@@ -3,9 +3,9 @@ mod tree;
 use node::TreeNode;
 use tree::{Tree, TreeBuilder};
 fn main() {
-    let mut tree = Tree::new(TreeBuilder::new(2, 1, 1, 2));
+    let mut tree = Tree::new(TreeBuilder::new(1, 1, 1, 2));
 
-     tree.run_through(&[0.2,0.2]);
+     tree.run_through(&[0.2]);
 
     /*let mut tree = Tree::new(TreeBuilder::new(0, 0, 0, 0));
     let a = tree.add_node(TreeNode::new(4.0, vec![], vec![]));

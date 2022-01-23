@@ -136,10 +136,10 @@ impl PreorderIter {
     }
     ///consumes a PreorderIter and iterates over the tree in the Preoirder
     pub fn next(&mut self, tree: &Tree) -> Option<TreeIndex> {
-        while let Some(node_index) = self.stack.pop() {
+        while let Some(node_index) = self.stack.pop()  {
             if let Some(node) = tree.node_at(node_index) {
                 if node.next_nodes.len() == 0 {
-                    println!("output value at index {} = {}", node_index, node.value);
+                    eprintln!("output value at index {} = {}", node_index, node.value);
                 }
                 for i in &*node.next_nodes {
                     self.stack.push((*i).unwrap());
