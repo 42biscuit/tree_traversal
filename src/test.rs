@@ -1,6 +1,6 @@
 const G: f32 = -9.81;
 const TIME_STEP: f32 = 0.01;
-pub const FORCE_APPLIED:f32 = 400.0;
+pub const FORCE_APPLIED: f32 = 300.0;
 #[allow(unused_variables, non_snake_case)]
 #[derive(Clone)]
 struct Pole {
@@ -9,7 +9,6 @@ struct Pole {
     Acceleration: f32,
     Mass: f32,
     Length: f32,
-    _Failiaure_angle: f32,
 }
 #[derive(Clone)]
 pub struct System {
@@ -43,15 +42,15 @@ impl System {
                 * (self.pole.Velocity.powf(2.0) * self.pole_angle().sin()
                     + self.pole.Acceleration * self.pole_angle().cos()))
             / (self.cart.Mass + self.pole.Mass);
-        //self.cart.Velocity += self.cart.Acceleration * TIME_STEP;
         self.cart.Position += self.cart.Acceleration * TIME_STEP;
         self.pole.Angle += (self.pole.Acceleration + self.cart.Acceleration * -0.008) * TIME_STEP;
+
         //println!("{}", self.pole_angle());
         vec![
             self.pole_angle(),
             self.pole.Acceleration,
             self.cart.Acceleration,
-            self.cart_pos()
+            self.cart_pos(),
         ]
     }
     pub fn pole_angle(&self) -> f32 {
@@ -63,13 +62,15 @@ impl System {
     pub fn cart_pos(&self) -> f32 {
         self.cart.Position
     }
-    pub fn cart_acc(&self)->f32{
+    pub fn cart_acc(&self) -> f32 {
         self.cart.Acceleration
     }
-    pub fn pole_acc(&self)->f32{
+    pub fn pole_acc(&self) -> f32 {
         self.pole.Acceleration
     }
-    
+    pub fn mod_pole_acc(&mut self, change:f32){
+        self.pole.Velocity += change
+    }
 }
 impl Pole {
     pub fn new(lengh: f32, mass: f32) -> Self {
@@ -79,7 +80,6 @@ impl Pole {
             Acceleration: 0.0,
             Mass: mass,
             Length: lengh,
-            _Failiaure_angle: 0.2443,
         }
     }
 }

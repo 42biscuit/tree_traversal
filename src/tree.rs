@@ -2,7 +2,7 @@ use rand::prelude::*;
 
 use crate::{
     node::{TreeIndex, TreeNode},
-    test::{System,FORCE_APPLIED},
+    test::{System, FORCE_APPLIED},
 };
 
 pub struct TreeBuilder {
@@ -34,7 +34,7 @@ pub struct trainer<T, A> {
     rand_rate: f32,
     test: fn(&mut A, &[f32]) -> Vec<T>, //returns angle,cart a
     test_struct: System,
-    test_fail: (f32, f32),
+    test_fail: fn(&[f32]) -> bool,
 }
 impl<T, A: Clone> trainer<T, A> {
     pub fn new(
@@ -44,7 +44,7 @@ impl<T, A: Clone> trainer<T, A> {
         rand_rate: f32,
         test: fn(&mut A, &[f32]) -> Vec<T>,
         test_struct: System,
-        test_fail: (f32, f32),
+        test_fail: fn(&[f32]) -> bool,
     ) -> Self {
         trainer {
             base: Tree::new(base),
@@ -61,25 +61,23 @@ impl<T, A: Clone> trainer<T, A> {
         let mut pop_pool = vec![(self.base.clone(), 0); self.population];
         let mut learning_rate = 0.0;
         let mut last_best = 1.0;
-        'found:for g in 1..self.generations+1 {
+        'found: for g in 1..self.generations + 1 {
             println!("{}", g);
-            learning_rate = 0.8*(1.5_f32.powf(-0.3*last_best/300.0))+0.01;
+            learning_rate = 0.8 * (1.5_f32.powf(-0.3 * last_best / 300.0)) + 0.01;
             for i in &mut pop_pool {
                 let mut test_st = self.test_struct.clone();
                 let mut data = test_st.update_vals(&[0.0]);
                 let mut res = Vec::new();
 
-                while test_st.pole_angle() < self.test_fail.0
-                    && test_st.pole_angle() > self.test_fail.1 &&  test_st.cart_pos() > -200.0 && test_st.cart_pos() < 200.0
-                {
+                while ((self.test_fail)(&[test_st.pole_angle(), test_st.cart_pos()])) == false {
                     res = i.0.run_through_bf(&data);
                     if res[0] > res[1] {
                         data = test_st.update_vals(&[FORCE_APPLIED]);
                     } else {
                         data = test_st.update_vals(&[-FORCE_APPLIED]);
                     }
-                    if i.1 > 100000{
-                        println!("found a good one {}",i.1);
+                    if i.1 > 100000 {
+                        println!("found a good one {}", i.1);
                         end_best.push(i.0.clone());
                         break 'found;
                     }
@@ -96,21 +94,21 @@ impl<T, A: Clone> trainer<T, A> {
                 }
             }
 
-            println!("best:{}", pop_pool[self.population-1].1);
-            last_best = pop_pool[self.population-1].1 as f32;
-            let best = &pop_pool.clone()[self.population-1];
-            end_best.push(best.0.clone()); 
-            if best.1 > 10000{
+            println!("best:{}", pop_pool[self.population - 1].1);
+            last_best = pop_pool[self.population - 1].1 as f32;
+            let best = &pop_pool.clone()[self.population - 1];
+            end_best.push(best.0.clone());
+            if best.1 > 10000 {
                 break 'found;
             }
-            for i in 0..pop_pool.len(){
-                pop_pool[i] =  (best.0.evolve(learning_rate),0);
+            for i in 0..pop_pool.len() {
+                pop_pool[i] = (best.0.evolve(learning_rate), 0);
             }
 
             /*let chunk = (self.population - self.population % 9) / 9;
             for i in 0..9 {
                 for j in 0..chunk {
-                    pop_pool[i * chunk + j] = (best[i].0.evolve(self.rand_rate), 0);
+                    pop_pool[i * chunk + j] = (best.0.evolve(self.rand_rate), 0);
                 }
             }*/
         }
@@ -304,7 +302,6 @@ impl PreorderIter {
         None
     } // immutable borrow &Tree ends here*/
 }
-
 
 #[cfg(test)]
 mod tree_test {
